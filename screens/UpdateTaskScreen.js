@@ -337,6 +337,11 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import AttachmentPreviewModal from '../components/DrawingModel'; // Adjust the path as needed
 
+const priorityColors = {
+  1: 'crimson', // High
+  2: 'plum', // Medium
+  3: 'pink', // Low
+};
 
 
 const UpdateTaskScreen = ({ route, navigation }) => {
@@ -347,12 +352,13 @@ const UpdateTaskScreen = ({ route, navigation }) => {
   const [taskDetails, setTaskDetails] = useState(task.taskDetails);
   const [taskStatus, setTaskStatus] = useState(task.myStatus);
   const [taskDate, setTaskDate] = useState(new Date(task.date));
+  const [taskPriority, setTaskPriority] =  useState(task.priority);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showAttachmentModal, setShowAttachmentModal] = useState(false);
   const [attachments, setAttachments] = useState(task.attachments || []);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [annotations, setAnnotations] = useState([]);
+  
 
   const handleUpdateTask = () => {
     const updatedTask = {
@@ -361,6 +367,7 @@ const UpdateTaskScreen = ({ route, navigation }) => {
       taskDetails,
       myStatus: taskStatus,
       date: taskDate.toISOString().split('T')[0],
+      priority: taskPriority,
       attachments,
     };
     updateTask(updatedTask);
@@ -447,17 +454,7 @@ const UpdateTaskScreen = ({ route, navigation }) => {
     setShowPreviewModal(false);
   };
 
-  const handleSaveAnnotations = (annotations) => {
-    if (selectedAttachment) {
-      const updatedAttachment = { ...selectedAttachment, annotations };
-      const updatedAttachments = attachments.map((attachment) =>
-        attachment.uri === selectedAttachment.uri ? updatedAttachment : attachment
-      );
-      setAttachments(updatedAttachments);
-      console.log('Updated Attachments:', updatedAttachments); // Log updated attachments
-      setShowPreviewModal(false);
-    }
-  };
+ 
   
   
   return (
@@ -485,6 +482,19 @@ const UpdateTaskScreen = ({ route, navigation }) => {
           <Picker.Item label="Pending" value="Pending" />
           <Picker.Item label="In Progress" value="In Progress" />
           <Picker.Item label="Done" value="Done" />
+        </Picker>
+      </View>
+
+      <View style={styles.pickerContainer}>
+        <Text>Priority:</Text>
+        <Picker
+          selectedValue={taskPriority}
+          style={styles.picker}
+          onValueChange={(itemValue) => setTaskPriority(itemValue)}
+        >
+          <Picker.Item label="High" value={1} color={priorityColors[1]}/>
+          <Picker.Item label="Medium" value={2} color={priorityColors[2]}/>
+          <Picker.Item label="Low" value={3} color={priorityColors[3]}/>
         </Picker>
       </View>
 

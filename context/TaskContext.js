@@ -3,6 +3,8 @@ import React, { createContext, useState } from 'react';
 
 export const TaskContext = createContext();
 
+
+
 export const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
 
@@ -18,13 +20,14 @@ export const TaskProvider = ({ children }) => {
     setTasks(tasks.filter(task => task.id !== taskId));
   };
 
+
   const filterTasks = (status) => {
     if (status === 'All') {
       return tasks;
     }
     return tasks.filter(task => task.myStatus === status);
   };
-
+ 
   const filterTasksByDate = (date) => {
     return tasks.filter(task => task.date === date);
   };
@@ -63,16 +66,18 @@ export const TaskProvider = ({ children }) => {
         : task
     ));
   };
-
-
-  const getDailyTasks = () => {
-    const today = format(new Date(), 'yyyy-MM-dd'); // Format today's date
-    const dailyTasks = tasks.filter(task => task.date === today);
-    
-    // Sort tasks by priority (if applicable) and take the top 3
-    const sortedTasks = dailyTasks.sort((a, b) => a.priority - b.priority);
-    return sortedTasks.slice(0, 3);
+  
+  // const sortTasksByPriority = (tasksList) => {
+  //   return tasksList.sort((a, b) => {
+  //     const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+  //     return (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4);
+  //   });
+  // };
+  const sortTasksByPriority = (tasksList) => {
+    return tasksList.sort((a, b) => a.priority - b.priority);
   };
+  
+  
 
   return (
     <TaskContext.Provider 
@@ -86,7 +91,7 @@ export const TaskProvider = ({ children }) => {
         addAttachmentToTask,
         updateTaskAttachment,
         removeTaskAttachment,
-        getDailyTasks,
+        sortTasksByPriority,
       }}
     >
       {children}

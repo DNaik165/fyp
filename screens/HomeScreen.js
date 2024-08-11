@@ -193,13 +193,15 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, FlatList, Image, Switch } from 'react-native';
 import { TaskContext } from '../context/TaskContext';
 
+
 const TaskItem = ({ task, onPress }) => (
   <TouchableOpacity onPress={() => onPress(task)}>
-    <View style={styles.taskContainer}>
+    <View style={styles.taskContainerT}>
       <Text style={styles.taskName}>{task.taskName}</Text>
       <Text style={styles.taskDetails}>{task.taskDetails}</Text>
       <Text>Date: {task.date}</Text>
       <Text>Status: {task.myStatus}</Text>
+      {/* <Text>Priority: {task.priority}</Text> */}
       {task.attachments && task.attachments.length > 0 && (
         <Image
           source={{ uri: task.attachments[0].uri }}
@@ -210,9 +212,48 @@ const TaskItem = ({ task, onPress }) => (
   </TouchableOpacity>
 );
 
-const CustomTaskItem = ({ task, onPress }) => {
-  let statusColor;
+// const CustomTaskItem = ({ task, onPress }) => {
+//   let statusColor;
 
+//   switch (task.myStatus) {
+//     case 'Pending':
+//       statusColor = 'salmon';
+//       break;
+//     case 'Progress':
+//       statusColor = 'pink';
+//       break;
+//     case 'Done':
+//       statusColor = 'lightblue';
+//       break;
+//     default:
+//       statusColor = 'lavender';
+//       break;
+//   }
+
+//   return (
+//     <TouchableOpacity onPress={() => onPress(task)}>
+//       <View style={styles.taskContainer}>
+//         <View style={styles.statusCircle}>
+//           <Text style={styles.taskName}>{task.taskName}</Text>
+//           <View style={[styles.pendingTask, { backgroundColor: statusColor }]}></View>
+//         </View>
+//         <View style={styles.statusDetails}>
+//           <Text style={styles.taskDetails}>{task.taskDetails}</Text>
+//           <Text style={styles.taskDetails}>{task.myStatus}</Text>
+//           {task.attachments && task.attachments.length > 0 && (
+//             <Image
+//               source={{ uri: task.attachments[0].uri }}
+//               style={styles.attachmentImage}
+//             />
+//           )}
+//         </View>
+//       </View>
+//     </TouchableOpacity>
+//   );
+// };
+const CustomTaskItem = ({ task, onPress }) => {
+  // Define colors for status
+  let statusColor;
   switch (task.myStatus) {
     case 'Pending':
       statusColor = 'salmon';
@@ -228,9 +269,26 @@ const CustomTaskItem = ({ task, onPress }) => {
       break;
   }
 
+  // Define colors for priority
+  let priorityBorderColor;
+  switch (task.priority) {
+    case 1: // High
+      priorityBorderColor = 'crimson'; // Red for high priority
+      break;
+    case 2: // Medium
+      priorityBorderColor = 'plum'; // Orange for medium priority
+      break;
+    case 3: // Low
+      priorityBorderColor = 'pink'; // Green for low priority
+      break;
+    default:
+      priorityBorderColor = 'grey'; // Default color if priority is not set
+      break;
+  }
+
   return (
     <TouchableOpacity onPress={() => onPress(task)}>
-      <View style={styles.taskContainer}>
+      <View style={[styles.taskContainer, { borderColor: priorityBorderColor }]}>
         <View style={styles.statusCircle}>
           <Text style={styles.taskName}>{task.taskName}</Text>
           <View style={[styles.pendingTask, { backgroundColor: statusColor }]}></View>
@@ -250,8 +308,12 @@ const CustomTaskItem = ({ task, onPress }) => {
   );
 };
 
+
+
+
+
 const HomeScreen = ({ navigation }) => {
-  const { tasks, filterTasks, filterTasksByDate } = useContext(TaskContext);
+  const { tasks, filterTasks, filterTasksByDate , sortTasksByPriority} = useContext(TaskContext);
   const [filteredTasks, setFilteredTasks] = useState(tasks);
   const [activeTab, setActiveTab] = useState('All');
   const [todayTasks, setTodayTasks] = useState([]);
@@ -263,19 +325,30 @@ const HomeScreen = ({ navigation }) => {
     console.log('Today\'s Tasks:', todayTasks);
   }, [tasks, filterTasksByDate]);
 
+
   useEffect(() => {
+    let tasksToDisplay = [];
     if (activeTab === 'Today' || focusMode) {
       const today = new Date().toISOString().split('T')[0];
-      setFilteredTasks(filterTasksByDate(today));
+      tasksToDisplay = filterTasksByDate(today);
     } else {
-      setFilteredTasks(filterTasks(activeTab));
+      tasksToDisplay = filterTasks(activeTab);
     }
-    console.log('Filtered Tasks:', filteredTasks);
+    console.log('Tasks before sorting:', tasksToDisplay);
+    const sortedTasks = sortTasksByPriority(tasksToDisplay);
+    console.log('Tasks after sorting:', sortedTasks);
+    setFilteredTasks(sortedTasks);
   }, [tasks, activeTab, filterTasks, filterTasksByDate, focusMode]);
+  
+ 
+ 
+
 
   const filterTasksByStatus = (status) => {
     setActiveTab(status);
   };
+
+
 
   const handleTaskPress = (task) => {
     navigation.navigate('UpdateTask', { task });
@@ -321,6 +394,7 @@ const HomeScreen = ({ navigation }) => {
               </TouchableOpacity>
             ))}
           </View>
+          
           {filteredTasks.map((item) => (
             <CustomTaskItem key={item.id} task={item} onPress={handleTaskPress} />
           ))}
@@ -356,12 +430,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'skyblue',
   },
+  taskContainerT: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginVertical: 8,
+    marginRight: 10,
+  },
   taskContainer: {
     padding: 16,
     backgroundColor: '#fff',
     borderRadius: 8,
     marginVertical: 8,
     marginRight: 10,
+    borderWidth: 2
   },
   taskName: {
     fontSize: 16,

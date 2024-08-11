@@ -10,6 +10,11 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 
 
+const priorityColors = {
+  1: 'crimson', // High
+  2: 'plum', // Medium
+  3: 'pink', // Low
+};
 
 const AddTaskScreen = ({ navigation }) => {
   const { addTask } = useContext(TaskContext);
@@ -17,6 +22,7 @@ const AddTaskScreen = ({ navigation }) => {
   const [taskDetails, setTaskDetails] = useState('');
   const [taskStatus, setTaskStatus] = useState('Pending');
   const [taskDate, setTaskDate] = useState(new Date());
+  const [taskPriority, setTaskPriority] = useState(1);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showAttachmentModal, setShowAttachmentModal] = useState(false);
   const [attachments, setAttachments] = useState([]);
@@ -28,6 +34,7 @@ const AddTaskScreen = ({ navigation }) => {
       taskDetails,
       myStatus: taskStatus,
       date: taskDate.toISOString().split('T')[0],
+      priority: taskPriority,
       attachments,
     };
     addTask(newTask);
@@ -35,6 +42,7 @@ const AddTaskScreen = ({ navigation }) => {
     setTaskDetails('');
     setTaskStatus('Pending');
     setTaskDate(new Date());
+    setTaskPriority(1); 
     setAttachments([]);
     navigation.goBack();
   };
@@ -126,6 +134,19 @@ const AddTaskScreen = ({ navigation }) => {
           <Picker.Item label="Pending" value="Pending" />
           <Picker.Item label="In Progress" value="Progress" />
           <Picker.Item label="Done" value="Done" />
+        </Picker>
+      </View>
+
+      <View style={styles.pickerContainer}>
+        <Text>Priority:</Text>
+        <Picker
+          selectedValue={taskPriority}
+          style={styles.picker}
+          onValueChange={(itemValue) => setTaskPriority(itemValue)}
+        >
+          <Picker.Item label="High" value={1} color={priorityColors[1]}/>
+          <Picker.Item label="Medium" value={2} color={priorityColors[2]}/>
+          <Picker.Item label="Low" value={3} color={priorityColors[3]}/>
         </Picker>
       </View>
 
