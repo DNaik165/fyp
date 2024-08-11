@@ -64,6 +64,16 @@ export const TaskProvider = ({ children }) => {
     ));
   };
 
+
+  const getDailyTasks = () => {
+    const today = format(new Date(), 'yyyy-MM-dd'); // Format today's date
+    const dailyTasks = tasks.filter(task => task.date === today);
+    
+    // Sort tasks by priority (if applicable) and take the top 3
+    const sortedTasks = dailyTasks.sort((a, b) => a.priority - b.priority);
+    return sortedTasks.slice(0, 3);
+  };
+
   return (
     <TaskContext.Provider 
       value={{
@@ -75,7 +85,8 @@ export const TaskProvider = ({ children }) => {
         filterTasksByDate,
         addAttachmentToTask,
         updateTaskAttachment,
-        removeTaskAttachment
+        removeTaskAttachment,
+        getDailyTasks,
       }}
     >
       {children}
