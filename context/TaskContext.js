@@ -1,5 +1,5 @@
 // //context/TaskContext.js real
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 
 export const TaskContext = createContext();
 
@@ -7,6 +7,9 @@ export const TaskContext = createContext();
 
 export const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
+  const [completedTasksCount, setCompletedTasksCount] = useState(0);
+  const [workSessions, setWorkSessions] = useState([]);
+
 
   const addTask = (task) => {
     setTasks([...tasks, task]);
@@ -67,14 +70,29 @@ export const TaskProvider = ({ children }) => {
     ));
   };
   
-  // const sortTasksByPriority = (tasksList) => {
-  //   return tasksList.sort((a, b) => {
-  //     const priorityOrder = { High: 1, Medium: 2, Low: 3 };
-  //     return (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4);
-  //   });
-  // };
+ 
   const sortTasksByPriority = (tasksList) => {
     return tasksList.sort((a, b) => a.priority - b.priority);
+  };
+
+  useEffect(() => {
+    const completedCount = tasks.filter(task => task.myStatus === 'Done').length;
+    setCompletedTasksCount(completedCount);
+  }, [tasks]);
+
+  // const addWorkSession = () => {
+  //   const newSession = { id: Date.now(), timestamp: new Date().toISOString()};
+  //   setWorkSessions(prevSessions => [...prevSessions, newSession]);
+  // }
+
+
+  const addWorkSession = () => {
+    const newSession = { id: Date.now(), timestamp: new Date().toISOString() };
+    setWorkSessions(prevSessions => {
+      const updatedSessions = [...prevSessions, newSession];
+      console.log('Total work sessions added:', updatedSessions.length);
+      return updatedSessions;
+    });
   };
   
   
@@ -83,6 +101,8 @@ export const TaskProvider = ({ children }) => {
     <TaskContext.Provider 
       value={{
         tasks, 
+        completedTasksCount,
+        workSessions,
         addTask, 
         updateTask, 
         deleteTask, 
@@ -92,6 +112,7 @@ export const TaskProvider = ({ children }) => {
         updateTaskAttachment,
         removeTaskAttachment,
         sortTasksByPriority,
+        addWorkSession
       }}
     >
       {children}

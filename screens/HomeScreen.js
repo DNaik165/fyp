@@ -212,45 +212,7 @@ const TaskItem = ({ task, onPress }) => (
   </TouchableOpacity>
 );
 
-// const CustomTaskItem = ({ task, onPress }) => {
-//   let statusColor;
 
-//   switch (task.myStatus) {
-//     case 'Pending':
-//       statusColor = 'salmon';
-//       break;
-//     case 'Progress':
-//       statusColor = 'pink';
-//       break;
-//     case 'Done':
-//       statusColor = 'lightblue';
-//       break;
-//     default:
-//       statusColor = 'lavender';
-//       break;
-//   }
-
-//   return (
-//     <TouchableOpacity onPress={() => onPress(task)}>
-//       <View style={styles.taskContainer}>
-//         <View style={styles.statusCircle}>
-//           <Text style={styles.taskName}>{task.taskName}</Text>
-//           <View style={[styles.pendingTask, { backgroundColor: statusColor }]}></View>
-//         </View>
-//         <View style={styles.statusDetails}>
-//           <Text style={styles.taskDetails}>{task.taskDetails}</Text>
-//           <Text style={styles.taskDetails}>{task.myStatus}</Text>
-//           {task.attachments && task.attachments.length > 0 && (
-//             <Image
-//               source={{ uri: task.attachments[0].uri }}
-//               style={styles.attachmentImage}
-//             />
-//           )}
-//         </View>
-//       </View>
-//     </TouchableOpacity>
-//   );
-// };
 const CustomTaskItem = ({ task, onPress }) => {
   // Define colors for status
   let statusColor;

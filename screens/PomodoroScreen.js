@@ -1,10 +1,11 @@
 // // screens/PomodoroScreen.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert, Vibration, Platform } from 'react-native';
-
+import { TaskContext } from '../context/TaskContext';
 
 const PomodoroScreen = () => {
+  const { addWorkSession } = useContext(TaskContext);
   const [workTime, setWorkTime] = useState(25); // Default work time in minutes
   const [shortBreakTime, setShortBreakTime] = useState(5); // Default short break time in minutes
   const [longBreakTime, setLongBreakTime] = useState(15); // Default long break time in minutes
@@ -34,6 +35,15 @@ const PomodoroScreen = () => {
     return () => clearInterval(interval);
   }, [isRunning, time]);
 
+   // useEffect for handling session completion
+   useEffect(() => {
+    if (time === 0 && isWorkInterval) {
+      // Call addWorkSession when a work interval completes
+      console.log('Work session completed. Adding to session count.');
+      addWorkSession();
+    }
+  }, [time, isWorkInterval]);
+
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -56,7 +66,6 @@ const PomodoroScreen = () => {
   Vibration.vibrate([500, 1000, 500], false);
 
 
-
   Alert.alert(
     'Times Up!',
     isWorkInterval ? 'Good job! Take a break.' : 'Break over! Back to work.',
@@ -65,7 +74,7 @@ const PomodoroScreen = () => {
     ],
     { cancelable: false }
   );
-};
+  };
 
 
  
@@ -77,6 +86,8 @@ const PomodoroScreen = () => {
       
       setSessionCount((prevCount) => {
         const newCount = prevCount + 1;
+        console.log('Work interval ended. Session count:', newCount);
+
         if (newCount % 4 === 0) {
           // Trigger a long break after every 4 work sessions
           console.log(`Starting long break. Duration: ${longBreakTime} minutes.`);

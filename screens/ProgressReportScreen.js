@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: 'lightblue',
     marginBottom: 20,
   },
   card: {
@@ -154,12 +154,12 @@ const styles = StyleSheet.create({
   subHeader: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#555',
+    color: 'lightblue',
   },
   count: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#333',
+    color: 'skyblue',
     marginTop: 10,
   },
   chart: {
