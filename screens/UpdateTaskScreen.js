@@ -328,7 +328,7 @@
 
 
 import React, { useState, useContext } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Modal, Button, Image, Share } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, Modal, Button, Image, Share, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TaskContext } from '../context/TaskContext';
 import { Picker } from '@react-native-picker/picker';
@@ -458,6 +458,7 @@ const UpdateTaskScreen = ({ route, navigation }) => {
   
   
   return (
+    <ScrollView>
     <View style={styles.container}>
       <TextInput
         placeholder="Task Name"
@@ -641,6 +642,7 @@ const UpdateTaskScreen = ({ route, navigation }) => {
         </View>
       </Modal>
     </View>
+    </ScrollView>
   );
 };
 

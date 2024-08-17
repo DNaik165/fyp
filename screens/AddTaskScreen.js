@@ -1,7 +1,7 @@
 // // // // screens/AddTaskScreen.js real
 
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button, Image, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TaskContext } from '../context/TaskContext';
 import { Picker } from '@react-native-picker/picker';
@@ -109,6 +109,7 @@ const AddTaskScreen = ({ navigation }) => {
   };
 
   return (
+    <ScrollView>
     <View style={styles.container}>
       <TextInput
         placeholder="Task Name"
@@ -240,6 +241,7 @@ const AddTaskScreen = ({ navigation }) => {
 
       </Modal>
     </View>
+    </ScrollView>
   );
 };
 

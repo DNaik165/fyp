@@ -1,19 +1,64 @@
 // // screens/PomodoroScreen.js
-
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert, Vibration, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert, Vibration, Animated, Easing, Modal, Switch } from 'react-native';
+import { Picker } from '@react-native-picker/picker'; // Import Picker for dropdown menu
+import Svg, { G, Path } from 'react-native-svg';
+import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
+import { Audio } from 'expo-av';
 import { TaskContext } from '../context/TaskContext';
+import { AntDesign } from '@expo/vector-icons';
+
+const cloudPath = "M17,9a4.08,4.08,0,0,0-.93.12,5,5,0,0,0-9,2.09A3,3,0,1,0,6,17H17a4,4,0,0,0,0-8Z";
 
 const PomodoroScreen = () => {
   const { addWorkSession } = useContext(TaskContext);
-  const [workTime, setWorkTime] = useState(25); // Default work time in minutes
-  const [shortBreakTime, setShortBreakTime] = useState(5); // Default short break time in minutes
-  const [longBreakTime, setLongBreakTime] = useState(15); // Default long break time in minutes
-  const [time, setTime] = useState(workTime * 60); // Initialize with work time
+  const [workTime, setWorkTime] = useState(25);
+  const [shortBreakTime, setShortBreakTime] = useState(5);
+  const [longBreakTime, setLongBreakTime] = useState(15);
+  const [time, setTime] = useState(workTime * 60);
   const [isRunning, setIsRunning] = useState(false);
-  const [isWorkInterval, setIsWorkInterval] = useState(true); // Track if it's work or break
-  const [sessionCount, setSessionCount] = useState(0); // Track number of work sessions
+  const [isWorkInterval, setIsWorkInterval] = useState(true);
+  const [sessionCount, setSessionCount] = useState(0);
+  const [animation] = useState(new Animated.Value(1));
+  const [isAnimationEnabled, setIsAnimationEnabled] = useState(true);
+  const [animationSpeed, setAnimationSpeed] = useState('2000'); // Default speed in milliseconds
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
+  // Music-related states
+  const [isMusicEnabled, setIsMusicEnabled] = useState(false);
+  const [musicUri, setMusicUri] = useState(null);
+  const [sound, setSound] = useState(null);
+  const [playbackPosition, setPlaybackPosition] = useState(0); // Track playback position
+
+  useEffect(() => {
+    if (isRunning && isAnimationEnabled) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(animation, {
+            toValue: 2.1,
+            duration: parseInt(animationSpeed, 10) / 2,
+            easing: Easing.ease,
+            useNativeDriver: true,
+          }),
+          Animated.timing(animation, {
+            toValue: 1,
+            duration: parseInt(animationSpeed, 10) / 2,
+            easing: Easing.ease,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      animation.stopAnimation();
+      animation.setValue(1);
+    }
+
+    if (time === 0) {
+      animation.stopAnimation();
+      animation.setValue(1);
+    }
+  }, [isRunning, time, isAnimationEnabled, animationSpeed]);
 
   useEffect(() => {
     let interval;
@@ -35,14 +80,15 @@ const PomodoroScreen = () => {
     return () => clearInterval(interval);
   }, [isRunning, time]);
 
-   // useEffect for handling session completion
-   useEffect(() => {
+  useEffect(() => {
     if (time === 0 && isWorkInterval) {
-      // Call addWorkSession when a work interval completes
-      console.log('Work session completed. Adding to session count.');
       addWorkSession();
     }
   }, [time, isWorkInterval]);
+
+  useEffect(() => {
+    return sound ? () => sound.unloadAsync() : undefined;
+  }, [sound]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -50,75 +96,133 @@ const PomodoroScreen = () => {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStartStop = () => {
-    setIsRunning(!isRunning);
-  };
+const handleStartStop = async () => {
+  console.log(`isRunning: ${isRunning}`);
+  setIsRunning(!isRunning);
+  if (!isRunning && isMusicEnabled && musicUri) {
+    playMusic();
+  } else if (isRunning && sound) {
+    sound.pauseAsync();
+    const status = await sound.getStatusAsync();
+    setPlaybackPosition(status.positionMillis); // Save playback position
+  }
+};
 
-  const handleReset = () => {
-    setIsRunning(false);
-    setIsWorkInterval(true);
-    setSessionCount(0);
-    setTime(workTime * 60);
-  };
-
+const handleReset = () => {
+  console.log(`Resetting timer. Stopping music.`);
+  setIsRunning(false);
+  setIsWorkInterval(true);
+  setSessionCount(0);
+  setTime(workTime * 60);
+  stopMusic();
+  setPlaybackPosition(0); // Reset playback position
+};
 
   const handleTimeUp = async () => {
-  Vibration.vibrate([500, 1000, 500], false);
-
-
-  Alert.alert(
-    'Times Up!',
-    isWorkInterval ? 'Good job! Take a break.' : 'Break over! Back to work.',
-    [
-      { text: 'OK', onPress: () => switchInterval() }
-    ],
-    { cancelable: false }
-  );
+    Vibration.vibrate([500, 1000, 500], false);
+    Alert.alert(
+      'Times Up!',
+      isWorkInterval ? 'Good job! Take a break.' : 'Break over! Back to work.',
+      [
+        { text: 'OK', onPress: () => switchInterval() }
+      ],
+      { cancelable: false }
+    );
   };
-
-
- 
 
   const switchInterval = () => {
     if (isWorkInterval) {
-      // End of work session
-      console.log(`Pomodoro session ${sessionCount + 1} ended. Duration: ${workTime} minutes.`);
-      
       setSessionCount((prevCount) => {
         const newCount = prevCount + 1;
-        console.log('Work interval ended. Session count:', newCount);
-
         if (newCount % 4 === 0) {
-          // Trigger a long break after every 4 work sessions
-          console.log(`Starting long break. Duration: ${longBreakTime} minutes.`);
           setIsWorkInterval(false);
           setTime(longBreakTime * 60);
         } else {
-          // Trigger a short break
-          console.log(`Starting short break. Duration: ${shortBreakTime} minutes.`);
           setIsWorkInterval(false);
           setTime(shortBreakTime * 60);
         }
         return newCount;
       });
     } else {
-      // End of break session
-      if (sessionCount % 4 === 0) {
-        console.log(`Long break ended. Duration: ${longBreakTime} minutes.`);
-      } else {
-        console.log(`Short break ended. Duration: ${shortBreakTime} minutes.`);
-      }
-
       setIsWorkInterval(true);
       setTime(workTime * 60);
     }
   };
 
+  const animatedCloudStyle = {
+    transform: [
+      {
+        scale: animation
+      }
+    ]
+  };
+
+const selectMusic = async () => {
+  console.log('Selecting music...');
+  let result = await DocumentPicker.getDocumentAsync({
+    type: 'audio/*',
+  });
+  console.log('DocumentPicker result:', result);
+
+  if (result.canceled) {
+    console.log('Music selection was canceled');
+    return;
+  }
+
+  if (result.assets && result.assets.length > 0) {
+    const selectedAsset = result.assets[0];
+    console.log('Selected asset details:', selectedAsset);
+    if (selectedAsset.uri) {
+      console.log('Selected music URI:', selectedAsset.uri);
+      setMusicUri(selectedAsset.uri); // Update the URI state
+    } else {
+      console.log('Selected asset does not have a URI');
+    }
+  } else {
+    console.log('No assets found in the result');
+  }
+};
+
+
+const playMusic = async () => {
+  console.log('Playing music from URI:', musicUri);
+  if (musicUri) {
+    try {
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: musicUri },
+        { shouldPlay: true, positionMillis: playbackPosition } // Start from saved position
+      );
+      setSound(newSound);
+      await newSound.playAsync();
+      console.log('Music is playing');
+    } catch (error) {
+      console.error('Error playing music:', error);
+    }
+  } else {
+    console.log('No valid music URI to play');
+  }
+};
+
+
+  const stopMusic = async () => {
+    if (sound) {
+      console.log('Stopping music');
+      await sound.stopAsync();
+    }
+  };
+
   return (
     <View style={styles.container}>
+      <Animated.View style={[styles.cloudContainer, animatedCloudStyle]}>
+        <Svg width="100" height="100" viewBox="0 -4.04 20.088 20.088">
+          <G id="cloud" transform="translate(-1.912 -5.986)">
+            <Path d={cloudPath} fill="lightblue" />
+            <Path d={cloudPath} fill="none" />
+          </G>
+        </Svg>
+      </Animated.View>
       <Text style={styles.timer}>{formatTime(time)}</Text>
       
-      {/* Work, Short Break, and Long Break Time Inputs */}
       <View style={styles.inputContainer}>
         <Text>Work Time (minutes):</Text>
         <TextInput
@@ -149,10 +253,96 @@ const PomodoroScreen = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleStartStop}>
-        <Text style={styles.buttonText}>{isRunning ? 'Pause' : 'Start'}</Text>
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => setIsSettingsModalVisible(true)}
+      >
+        <AntDesign name="setting" style={styles.floatingButtonText} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={handleReset}>
+
+      <Modal
+        visible={isSettingsModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsSettingsModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Settings</Text>
+            
+            <View style={styles.switchContainer}>
+              <Text>Animation Enabled:</Text>
+              <Switch
+                value={isAnimationEnabled}
+                onValueChange={(value) => setIsAnimationEnabled(value)}
+              />
+            </View>
+
+            <View style={styles.pickerContainer}>
+              <Text>Animation Speed:</Text>
+              <Picker
+                selectedValue={animationSpeed}
+                style={styles.picker}
+                onValueChange={(itemValue) => setAnimationSpeed(itemValue)}
+              >
+                
+                
+                <Picker.Item label="Fast" value="500" />
+                <Picker.Item label="Medium" value="1000" />
+                <Picker.Item label="Slow" value="2000" />
+                <Picker.Item label="Very Slow" value="5000" />
+              </Picker>
+            </View>
+
+            <View style={styles.switchContainer}>
+              <Text>Enable Music:</Text>
+              <Switch
+                value={isMusicEnabled}
+                onValueChange={(value) => {
+                  setIsMusicEnabled(value);
+                  if (value) {
+                    playMusic(); // Start music if enabled
+                  } else {
+                    stopMusic(); // Stop music if disabled
+                  }
+                }}
+              />
+            </View>
+
+            {isMusicEnabled && (
+              <TouchableOpacity
+                style={styles.buttonP}
+                onPress={selectMusic}
+              >
+                <Text style={styles.buttonText}>
+                  {musicUri ? 'Change Music' : 'Select Music'}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity
+              style={[styles.buttonP, styles.modalButton]}
+              onPress={() => setIsSettingsModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleStartStop}
+      >
+        <Text style={styles.buttonText}>
+          {isRunning ? 'Pause' : 'Start'}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleReset}
+      >
         <Text style={styles.buttonText}>Reset</Text>
       </TouchableOpacity>
     </View>
@@ -160,15 +350,16 @@ const PomodoroScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  // Add your existing styles here, and modify as needed
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'white',
   },
   timer: {
     fontSize: 48,
-    marginBottom: 20,
+    fontWeight: 'bold',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -178,17 +369,75 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
     padding: 8,
     width: 60,
     marginLeft: 10,
   },
+  cloudContainer: {
+    marginBottom: 20,
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: 'lightblue',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  floatingButtonText: {
+    color: 'white',
+    fontSize: 24,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: 'skyblue'
+  },
+  modalButton: {
+    marginTop: 20,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  pickerContainer: {
+    marginVertical: 10,
+  },
+  picker: {
+    width: '100%',
+  },
   button: {
     backgroundColor: 'lightblue',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 20,
     marginVertical: 10,
     width: 100,
+    alignItems: 'center',
+  },
+  buttonP: {
+    backgroundColor: 'lightblue',
+    padding: 10,
+    borderRadius: 20,
+    marginVertical: 10,
+    width: 150,
     alignItems: 'center',
   },
   buttonText: {
@@ -198,58 +447,6 @@ const styles = StyleSheet.create({
 });
 
 export default PomodoroScreen;
-
-
-
-
-
-
-
-
-
-
-// 2. Prioritization System
-// Integration: Modify the AddTaskScreen to include a priority level dropdown.
-// Details: Add a priority field to the task object. Update the TaskListScreen to allow sorting or filtering tasks based on priority.
-// 3. Visual Task Board
-// Screen: You could create a new TaskBoardScreen.
-// Details: Implement a Kanban board where users can drag and drop tasks between columns like "To Do," "In Progress," and "Done."
-// 4. Daily Goals/Top 3 Tasks
-// Integration: Add a section on HomeScreen to display today's goals or top tasks.
-// Details: Allow users to mark certain tasks as daily goals and display these on the home screen.
-
-
-// 6. Habit Tracker
-// Screen: Consider adding a HabitTrackerScreen.
-// Details: Track habits with a visual representation of streaks or progress. Allow users to add and track habits alongside tasks.
-// 7. Customizable Notifications
-// Integration: Extend the TaskContext to manage notification settings.
-// Details: Allow users to customize reminders and notifications for tasks.
-// 8. Task Dependencies
-// Integration: Modify AddTaskScreen to include dependencies.
-// Details: Allow users to set dependencies between tasks, and display these dependencies in the task list.
-// 9. Voice Commands
-// Integration: Use voice recognition libraries to allow voice commands for adding or managing tasks.
-// Details: Implement a button or gesture to activate voice commands.
-// 10. Gamification Elements
-// Integration: Add gamification features to HomeScreen or TaskListScreen.
-// Details: Display points, badges, or achievements for completing tasks and maintaining streaks.
-// 11. Customizable Themes
-// Integration: Use your existing theme management system for customizable themes.
-// Details: Allow users to switch between different themes or create their own.
-// 12. Integration with Calendar
-// Integration: Sync tasks with a calendar view on HomeScreen or a new CalendarScreen.
-// Details: Display tasks and events in a unified calendar view.
-// 13. Task Templates
-// Integration: Add a feature to save and use templates on AddTaskScreen.
-// Details: Allow users to create and use task templates for common tasks or projects.
-
-
-
-// 15. Progress Visualization
-// Integration: Use charts or graphs on HomeScreen or a new ProgressScreen.
-// Details: Provide visual feedback on task completion and time spent.
-
 
 
 

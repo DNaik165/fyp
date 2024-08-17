@@ -80,21 +80,11 @@ export const TaskProvider = ({ children }) => {
     setCompletedTasksCount(completedCount);
   }, [tasks]);
 
-  // const addWorkSession = () => {
-  //   const newSession = { id: Date.now(), timestamp: new Date().toISOString()};
-  //   setWorkSessions(prevSessions => [...prevSessions, newSession]);
-  // }
-
-
   const addWorkSession = () => {
-    const newSession = { id: Date.now(), timestamp: new Date().toISOString() };
-    setWorkSessions(prevSessions => {
-      const updatedSessions = [...prevSessions, newSession];
-      console.log('Total work sessions added:', updatedSessions.length);
-      return updatedSessions;
-    });
-  };
-  
+    const newSession = { id: Date.now(), timestamp: new Date().toISOString()};
+    setWorkSessions(prevSessions => [...prevSessions, newSession]);
+  }
+
   
 
   return (
