@@ -526,14 +526,6 @@ const styles = StyleSheet.create({
     width: 120,
     alignItems: 'center',
   },
-   buttonP: {
-    backgroundColor: 'lightblue',
-    padding: 4,
-    borderRadius: 20,
-    marginVertical: 10,
-    width: 120,
-    alignItems: 'center',
-  },
   buttonText: {
     fontSize: 18,
     color: 'white',

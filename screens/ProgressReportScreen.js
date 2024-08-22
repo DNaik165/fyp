@@ -200,6 +200,7 @@ const ProgressReportScreen = () => {
   const { completedTasksCount, workSessions, tasks } = useContext(TaskContext);
   const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
 
+  
   // Calculate tasks and work sessions completed each day for the given week
   const getWeeklyData = useCallback((weekStart) => {
     const weekStartDate = new Date(weekStart);

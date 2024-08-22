@@ -335,7 +335,7 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import AttachmentPreviewModal from '../components/DrawingModel'; // Adjust the path as needed
+
 
 const priorityColors = {
   1: 'crimson', // High
@@ -481,7 +481,7 @@ const UpdateTaskScreen = ({ route, navigation }) => {
           onValueChange={(itemValue) => setTaskStatus(itemValue)}
         >
           <Picker.Item label="Pending" value="Pending" />
-          <Picker.Item label="In Progress" value="In Progress" />
+          <Picker.Item label="In Progress" value="Progress" />
           <Picker.Item label="Done" value="Done" />
         </Picker>
       </View>
