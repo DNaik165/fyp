@@ -178,7 +178,7 @@
 import React, { useContext, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
 import { TaskContext } from '../context/TaskContext';
-import { LineChart } from 'react-native-chart-kit';
+import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 
 // Utility function to get the start of the week (Monday) for a given date
 const getStartOfWeek = (date) => {
@@ -197,7 +197,7 @@ const getDayIndex = (date, weekStartDate) => {
 };
 
 const ProgressReportScreen = () => {
-  const { completedTasksCount, workSessions, tasks } = useContext(TaskContext);
+  const {  workSessions, tasks,completedTasksToday, getTaskCompletionByHour, predictTaskCompletion, getTaskCompletionRate  } = useContext(TaskContext);
   const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
 
   
@@ -265,6 +265,12 @@ const ProgressReportScreen = () => {
     });
   };
 
+  // const hourlyCompletionData = getTaskCompletionByHour();
+  const completionRate = getTaskCompletionRate();
+
+
+
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Progress Report</Text>
@@ -282,8 +288,51 @@ const ProgressReportScreen = () => {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.subHeader}>Completed Tasks</Text>
-        <Text style={styles.count}>{completedTasksCount}</Text>
+        <Text style={styles.subHeader}>Task Completion Rate</Text>
+        <Text style={styles.count}>{(completionRate * 100).toFixed(2)}%</Text>
+      </View>
+
+      {/* <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>Hourly Task Completion</Text>
+        <LineChart
+          data={{
+            labels: ['12am', '6am', '12pm', '6pm', '11pm'],
+            datasets: [{
+              data: hourlyCompletionData
+            }]
+          }}
+          width={Dimensions.get('window').width - 40}
+          height={220}
+          yAxisLabel=""
+          chartConfig={{
+            backgroundColor: '#ffffff',
+            backgroundGradientFrom: '#ffffff',
+            backgroundGradientTo: '#ffffff',
+            decimalPlaces: 0,
+            color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          }}
+          style={styles.chart}
+        />
+      </View> */}
+      
+
+      <View style={styles.card}>
+        <Text style={styles.subHeader}>Task Completion Forecast</Text>
+        {tasks.filter(task => task.myStatus !== 'Done').map(task => (
+          <Text key={task.id} style={styles.taskFore}>
+            {task.taskName}: {predictTaskCompletion(task.id)}
+          </Text>
+        ))}
+      </View>
+
+
+
+
+
+      <View style={styles.card}>
+        <Text style={styles.subHeader}>Completed Tasks Today</Text>
+        <Text style={styles.count}>{completedTasksToday}</Text>
       </View>
 
       <View style={styles.chartContainer}>
@@ -319,7 +368,7 @@ const ProgressReportScreen = () => {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.subHeader}>Completed Work Sessions</Text>
+        <Text style={styles.subHeader}>Completed Work Sessions Today</Text>
         <Text style={styles.count}>{workSessions.length}</Text>
       </View>
 
@@ -378,12 +427,12 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: 'RubikBubbles-Regular',
     color: 'lightblue'
   },
   header: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: 'RubikBubbles-Regular',
     color: 'lightblue',
     marginBottom: 20,
   },
@@ -400,18 +449,25 @@ const styles = StyleSheet.create({
     elevation: 3,
     alignItems: 'center',
   },
-  //   card: {
-  //   alignItems: 'center',
-  //   marginVertical: 10,
-  // },
+  chartTitle: {
+    fontSize: 18,
+    fontFamily: 'RubikBubbles-Regular',
+    marginBottom: 10,
+    color: 'lightblue',
+  },
   subHeader: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'RubikBubbles-Regular',
     color: 'lightblue',
+  },
+  taskFore:{
+    fontSize: 23,
+    fontFamily: 'RubikBubbles-Regular',
+    color: 'skyblue',
   },
   count: {
     fontSize: 36,
-    fontWeight: 'bold',
+    fontFamily: 'RubikBubbles-Regular',
     color: 'skyblue',
     marginTop: 10,
   },

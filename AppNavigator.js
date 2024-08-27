@@ -6,7 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
-import { FontAwesome5, MaterialIcons, AntDesign } from '@expo/vector-icons';
+import { FontAwesome5, MaterialIcons, AntDesign, Ionicons } from '@expo/vector-icons';
 import HomeScreen from './screens/HomeScreen';
 import TaskListScreen from './screens/TaskListScreen';
 import AddTaskScreen from './screens/AddTaskScreen';
@@ -19,6 +19,7 @@ import AuthScreen from './screens/AuthScreen';
 import GameScreen from './screens/GameScreen';
 import UserProfileScreen from './screens/UserScreen'; // Import UserProfileScreen
 import { auth } from './firebase';
+import CompletedTasksScreen from './screens/CompletedTasksScreen';
 
 
 
@@ -38,34 +39,33 @@ const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
 
-const HomeStackNavigator = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="Todo" component={HomeScreen} />
-    <Stack.Screen name="UpdateTask" component={UpdateTaskScreen} />
-    <Stack.Screen name="Game" component={GameScreen} />
-  </Stack.Navigator>
-);
-
 // const HomeStackNavigator = () => (
 //   <Stack.Navigator>
-//     <Stack.Screen
-//       name="Home"
-//       component={HomeScreen}
-//       options={{
-//         headerTitle: () => <MotivationalHeader />,
-//         headerStyle: {
-//           backgroundColor: 'skyblue', // Adjust as needed
-//         },
-//       }}
-//     />
+//     <Stack.Screen name="Todo" component={HomeScreen} />
 //     <Stack.Screen name="UpdateTask" component={UpdateTaskScreen} />
+//     <Stack.Screen name="Game" component={GameScreen} />
 //   </Stack.Navigator>
 // );
 
+const HomeStackNavigator = () => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="Home"
+      component={HomeScreen}
+      options={{
+        headerTitle: () => <MotivationalHeader />,
+        headerStyle: {
+          backgroundColor: 'skyblue', // Adjust as needed
+        },
+      }}
+    />
+    <Stack.Screen name="UpdateTask" component={UpdateTaskScreen} />
+  </Stack.Navigator>
+);
+
 const TaskStackNavigator = () => (
   <Stack.Navigator >
-    <Stack.Screen options={{ headerShown:false }}
- name="TaskList" component={TaskListScreen} />
+    <Stack.Screen options={{ headerShown:false }} name="TaskList" component={TaskListScreen} />
     <Stack.Screen name="UpdateTask" component={UpdateTaskScreen} />
     <Stack.Screen name="AddTask" component={AddTaskScreen} />
   </Stack.Navigator>
@@ -92,13 +92,16 @@ const DrawerNavigator = () => (
           case 'Profile':
              iconName = 'user';
              return <AntDesign name={iconName} size={size} color={color} />;
+          case 'Completed Tasks':
+             iconName = 'checkmark-done';
+             return <Ionicons name={iconName} size={size} color={color} />;
           default:
             return null;
         }
       },
     })}
   >
-     <Drawer.Screen name="Profile" component={UserProfileScreen} />
+   
     <Drawer.Screen
       name="Home" 
       component={TabNavigator}
@@ -107,9 +110,10 @@ const DrawerNavigator = () => (
         headerShown: false, // Hide the header when navigating to Home
       }}
     />
-    {/* <Drawer.Screen name="Profile" component={UserProfileScreen} /> */}
     <Drawer.Screen name="Game" component={GameScreen} />
     <Drawer.Screen name="Progress Report" component={ProgressReportScreen} />
+    <Drawer.Screen name="Completed Tasks" component={CompletedTasksScreen} />
+    <Drawer.Screen name="Profile" component={UserProfileScreen} />
   </Drawer.Navigator>
 );
 
@@ -118,7 +122,7 @@ const TabNavigator = () => (
     <Tab.Screen
       name="Home"
       component={HomeStackNavigator}
-      options={{ headerShown:false ,
+      options={{ 
         tabBarIcon: ({ color, size }) => (
           <FontAwesome5 name="home" size={size} color={color} />
         ),
@@ -207,12 +211,11 @@ const AppNavigator = () => {
 const styles = StyleSheet.create({
   drawerHeader: {
     padding: 20,
-    backgroundColor: '#f5f5f5', // Background color of the drawer header
+    backgroundColor: 'lightblue', // Background color of the drawer header
   },
   drawerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    fontFamily: 'RubiksBubble-Regular'
+    fontFamily: 'RubikBubbles-Regular',
   },
 });
 

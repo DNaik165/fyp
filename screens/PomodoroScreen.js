@@ -421,15 +421,16 @@ const styles = StyleSheet.create({
   },
   timer: {
     fontSize: 48,
-    fontWeight: 'bold',
+    fontFamily: 'RubikBubbles-Regular',
     color: 'white',
     marginBottom: 20,
   },
   cloudContainer: {
-        marginBottom: 20,
-      },
+    marginBottom: 20,
+  },
   EMs: {
-    color: 'skyblue'
+    color: 'skyblue',
+    fontFamily: 'RubikBubbles-Regular',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -465,6 +466,7 @@ const styles = StyleSheet.create({
   },
   floatingButtonText: {
     color: 'white',
+    fontFamily: 'RubikBubbles-Regular',
     fontSize: 24,
   },
   modalContainer: {
@@ -481,7 +483,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'RubikBubbles-Regular',
     marginBottom: 20,
     color: 'skyblue'
   },
@@ -489,7 +491,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   modalLabel: {
-    color: 'skyblue'
+    color: 'skyblue',
+    fontFamily: 'RubikBubbles-Regular',
   },
   switchContainer: {
     flexDirection: 'row',
@@ -528,6 +531,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 18,
+    fontFamily: 'RubikBubbles-Regular',
     color: 'white',
 
   },
@@ -539,7 +543,8 @@ const styles = StyleSheet.create({
       headerText: {
         fontSize: 24,
         color: 'white',
-        fontWeight: 'bold',
+        fontFamily: 'RubikBubbles-Regular',
+        
       },
 });
 

@@ -93,6 +93,7 @@ const HomeScreen = ({ navigation }) => {
   const [todayTasks, setTodayTasks] = useState([]);
   const [focusMode, setFocusMode] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('All');
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -142,10 +143,7 @@ const HomeScreen = ({ navigation }) => {
         />
       </View>
 
-    {/* <View style={styles.container}>
-      <Text>Completed Tasks: {completedTasksCount}</Text>
-      <Button title="Go to Game" onPress={() => navigation.navigate('Game')} />
-    </View> */}
+ 
 
       <ScrollView>
         <View style={styles.upComings}>
@@ -271,7 +269,7 @@ const styles = StyleSheet.create({
   },
   upcomingText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'RubikBubbles-Regular',
     marginBottom: 10,
     color: 'skyblue',
   },
@@ -284,6 +282,7 @@ const styles = StyleSheet.create({
   focusModeText: {
     fontSize: 16,
     color: 'skyblue',
+    fontFamily: 'RubikBubbles-Regular',
   },
   taskContainerT: {
     padding: 16,
@@ -302,12 +301,13 @@ const styles = StyleSheet.create({
   },
   taskName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'RubikBubbles-Regular',
     color: 'lightblue',
   },
   taskDetails: {
     fontSize: 14,
     color: 'gray',
+    fontFamily: 'RubikBubbles-Regular',
   },
   statusCircle: {
     flexDirection: 'row',
@@ -337,6 +337,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontSize: 14,
+    fontFamily: 'RubikBubbles-Regular',
     color: 'lightblue',
   },
   activeFilterText: {
@@ -362,6 +363,7 @@ const styles = StyleSheet.create({
   floatingButtonText: {
     color: 'white',
     fontSize: 24,
+    fontFamily: 'RubikBubbles-Regular',
   },
   modalContent: {
     flex: 1,
