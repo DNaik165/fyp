@@ -42,7 +42,7 @@ const AddTaskScreen = ({ navigation }) => {
     setTaskDetails('');
     setTaskStatus('Pending');
     setTaskDate(new Date());
-    setTaskPriority(1); 
+    setTaskPriority(1);
     setAttachments([]);
     navigation.goBack();
   };
@@ -87,14 +87,28 @@ const AddTaskScreen = ({ navigation }) => {
     setShowAttachmentModal(false);
   };
 
+
   const handlePickFile = async () => {
     try {
-      const result = await DocumentPicker.getDocumentAsync();
+      const result = await DocumentPicker.getDocumentAsync({
+        copyToCacheDirectory: true,
+        type: [
+          "text/plain",
+          "text/csv",
+          "text/html",
+          "text/xml",
+          "application/pdf",
+          "application/xml",
+          "video/*",
+          "audio/*"
+        ]
+      });
       console.log('Document picker result:', result);
-
-      if (!result.canceled && result.uri) {
-        console.log('File selected:', result.uri);
-        setAttachments([...attachments, { uri: result.uri }]);
+  
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const fileUri = result.assets[0].uri;
+        console.log('File selected:', fileUri);
+        setAttachments([...attachments, { uri: fileUri }]);
       } else {
         console.log('File selection was canceled or failed.');
       }
@@ -103,6 +117,9 @@ const AddTaskScreen = ({ navigation }) => {
     }
     setShowAttachmentModal(false);
   };
+  
+
+
 
   const handleRemoveAttachment = (uri) => {
     setAttachments(attachments.filter(att => att.uri !== uri));

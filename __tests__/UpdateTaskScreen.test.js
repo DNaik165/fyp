@@ -1,10 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import UpdateTaskScreen from '../screens/UpdateTaskScreen';
+import HomeScreen from '../screens/HomeScreen';
 
-describe('<UpdateTaskScreen />', () => {
+describe('<HomeScreen />', () => {
     it('should match snapshot', () => {
-        const snap = render(<UpdateTaskScreen />).toJSON();
+        const snap = render(<HomeScreen />).toJSON();
         expect(snap).toMatchSnapshot();
     })
 })

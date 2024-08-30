@@ -1,431 +1,3 @@
-// // // // screens/GameScreen.js
-
-// import React, { useContext, useState, useEffect } from 'react';
-// import { View, Text, Button, TextInput, StyleSheet, Alert } from 'react-native';
-// import { TaskContext } from '../context/TaskContext';
-
-// const GameScreen = ({ navigation }) => {
-//   const { isGameUnlocked, gameRoundsLeft, decrementGameRounds } = useContext(TaskContext);
-//   const [gameMessage, setGameMessage] = useState('');
-//   const [userGuess, setUserGuess] = useState('');
-//   const [randomNumber, setRandomNumber] = useState(null);
-
-//   console.log('isGameUnlocked:', isGameUnlocked);
-
-//   useEffect(() => {
-//     // Generate a random number between 1 and 10 when the game starts
-//     setRandomNumber(Math.floor(Math.random() * 10) + 1);
-//   }, []);
-
-//   const handlePlayGame = () => {
-//     if (parseInt(userGuess) === randomNumber) {
-//       setGameMessage('Congratulations! You guessed the correct number!');
-//       Alert.alert('You won!', 'The game is now locked. Complete more tasks to unlock it again.');
-//     } else {
-//       setGameMessage('Wrong guess. Try again!');
-//       decrementGameRounds(); // Decrease the rounds left
-//       if (gameRoundsLeft - 1 === 0) {
-//         Alert.alert('Game Over', 'You have no rounds left. The game is now locked.');
-//       }
-//     }
-//     setUserGuess(''); // Clear the input for the next round
-//   };
-
-//   if (!isGameUnlocked) {
-//     return (
-//       <View style={styles.lockedContainer}>
-//         <Text style={styles.lockedText}>Complete 3 tasks to unlock the game!</Text>
-//         <Button title="Go Back" onPress={() => navigation.goBack()} color="gold" />
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.title}>Guess the Number Game</Text>
-//       <Text style={styles.instructions}>
-//         I'm thinking of a number between 1 and 10. Can you guess it?
-//       </Text>
-//       <TextInput
-//         style={styles.input}
-//         keyboardType="numeric"
-//         value={userGuess}
-//         onChangeText={setUserGuess}
-//         placeholder="Enter your guess"
-//         placeholderTextColor="#888"
-//       />
-//       <Button title="Submit Guess" onPress={handlePlayGame} color="#28A745" />
-//       <Text style={styles.gameMessage}>{gameMessage}</Text>
-//       <Text style={styles.roundsLeft}>Rounds left: {gameRoundsLeft}</Text>
-//       <Button title="Go Back" onPress={() => navigation.goBack()} color="#007AFF" />
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   lockedContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     backgroundColor: 'lightblue',
-//     padding: 20,
-//   },
-//   lockedText: {
-//     fontSize: 18,
-//     color: 'white',
-//     marginBottom: 20,
-//     textAlign: 'center',
-//     fontFamily: 'RubikBubbles-Regular'
-//   },
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     backgroundColor: 'lightblue',
-//     padding: 20,
-//   },
-//   title: {
-//     fontSize: 28,
-//     color: '#343A40',
-//     marginBottom: 20,
-//     textAlign: 'center',
-//     fontFamily: 'RubikBubbles-Regular'
-//   },
-//   instructions: {
-//     fontSize: 16,
-//     color: '#6C757D',
-//     marginBottom: 20,
-//     textAlign: 'center',
-//     fontFamily: 'RubikBubbles-Regular'
-//   },
-//   input: {
-//     height: 40,
-//     borderColor: '#CED4DA',
-//     borderWidth: 1,
-//     marginBottom: 20,
-//     paddingHorizontal: 10,
-//     width: '80%',
-//     textAlign: 'center',
-//     borderRadius: 5,
-//     backgroundColor: '#FFFFFF',
-//     color: '#343A40',
-//   },
-//   gameMessage: {
-//     fontSize: 18,
-//     color: '#17A2B8',
-//     marginTop: 20,
-//     textAlign: 'center',
-//     fontFamily: 'RubikBubbles-Regular'
-//   },
-//   roundsLeft: {
-//     fontSize: 18,
-//     color: '#FFC107',
-//     marginTop: 10,
-//     textAlign: 'center',
-//   },
-// });
-
-// export default GameScreen;
-
-
-// import React, { useContext, useState, useEffect } from 'react';
-// import { View, Text, Button, TextInput, StyleSheet, Alert } from 'react-native';
-// import { TaskContext } from '../context/TaskContext';
-
-// const GameScreen = ({ navigation }) => {
-//   const { isGameUnlocked, gameRoundsLeft, decrementGameRounds, resetGameRounds } = useContext(TaskContext);
-//   const [selectedGame, setSelectedGame] = useState(null);
-//   const [gameMessage, setGameMessage] = useState('');
-//   const [userGuess, setUserGuess] = useState('');
-//   const [randomNumber, setRandomNumber] = useState(null);
-//   const [userChoice, setUserChoice] = useState('');
-//   const [computerChoice, setComputerChoice] = useState('');
-
-//   useEffect(() => {
-//     if (selectedGame === 'GuessTheNumber') {
-//       setRandomNumber(Math.floor(Math.random() * 10) + 1);
-//     }
-//   }, [selectedGame]);
-
-//   const handlePlayGuessTheNumber = () => {
-//     if (parseInt(userGuess) === randomNumber) {
-//       setGameMessage('Congratulations! You guessed the correct number!');
-//       // resetGameRounds();
-//       Alert.alert('You won!', 'The game is now locked. Complete more tasks to unlock it again.');
-//     } else {
-//       setGameMessage('Wrong guess. Try again!');
-//       decrementGameRounds();
-//       if (gameRoundsLeft - 1 === 0) {
-//         Alert.alert('Game Over', 'You have no rounds left. The game is now locked.');
-//         // resetGameRounds();
-//       }
-//     }
-//     setUserGuess('');
-//   };
-
-//   const handlePlayRockPaperScissors = (choice) => {
-//     const choices = ['Rock', 'Paper', 'Scissors'];
-//     const computerChoice = choices[Math.floor(Math.random() * 3)];
-//     setUserChoice(choice);
-//     setComputerChoice(computerChoice);
-
-//     if (
-//       (choice === 'Rock' && computerChoice === 'Scissors') ||
-//       (choice === 'Paper' && computerChoice === 'Rock') ||
-//       (choice === 'Scissors' && computerChoice === 'Paper')
-//     ) {
-//       setGameMessage('You win this round!');
-//     } else if (choice === computerChoice) {
-//       setGameMessage('It\'s a tie!');
-//     } else {
-//       setGameMessage('Computer wins this round!');
-//     }
-
-//     decrementGameRounds();
-//     if (gameRoundsLeft - 1 === 0) {
-//       Alert.alert('Game Over', 'You have no rounds left. The game is now locked.');
-//       // resetGameRounds();
-//     }
-//   };
-
-//   if (!isGameUnlocked) {
-//     return (
-//       <View style={styles.lockedContainer}>
-//         <Text style={styles.lockedText}>Complete 3 tasks to unlock the game!</Text>
-//         <Button title="Go Back" onPress={() => navigation.goBack()} />
-//       </View>
-//     );
-//   }
-
-//   if (!selectedGame) {
-//     return (
-//       <View style={styles.container}>
-//         <Text style={styles.title}>Choose a Game</Text>
-//         <Button title="Guess the Number" onPress={() => setSelectedGame('GuessTheNumber')} />
-//         <Button title="Rock-Paper-Scissors" onPress={() => setSelectedGame('RockPaperScissors')} />
-//         <Button title="Go Back" onPress={() => navigation.goBack()} />
-//       </View>
-//     );
-//   }
-
-//   if (selectedGame === 'GuessTheNumber') {
-//     return (
-//       <View style={styles.container}>
-//         <Text style={styles.title}>Guess the Number Game</Text>
-//         <Text>I'm thinking of a number between 1 and 10. Can you guess it?</Text>
-//         <TextInput
-//           style={styles.input}
-//           keyboardType="numeric"
-//           value={userGuess}
-//           onChangeText={setUserGuess}
-//           placeholder="Enter your guess"
-//         />
-//         <Button title="Submit Guess" onPress={handlePlayGuessTheNumber} />
-//         <Text>{gameMessage}</Text>
-//         <Text>Rounds left: {gameRoundsLeft}</Text>
-//         <Button title="Go Back" onPress={() => setSelectedGame(null)} />
-//       </View>
-//     );
-//   }
-
-//   if (selectedGame === 'RockPaperScissors') {
-//     return (
-//       <View style={styles.container}>
-//         <Text style={styles.title}>Rock-Paper-Scissors</Text>
-//         <Text>Choose your move:</Text>
-//         <View style={styles.buttonRow}>
-//           <Button title="Rock" onPress={() => handlePlayRockPaperScissors('Rock')} />
-//           <Button title="Paper" onPress={() => handlePlayRockPaperScissors('Paper')} />
-//           <Button title="Scissors" onPress={() => handlePlayRockPaperScissors('Scissors')} />
-//         </View>
-//         <Text>{`Your choice: ${userChoice}`}</Text>
-//         <Text>{`Computer's choice: ${computerChoice}`}</Text>
-//         <Text>{gameMessage}</Text>
-//         <Text>Rounds left: {gameRoundsLeft}</Text>
-//         <Button title="Go Back" onPress={() => setSelectedGame(null)} />
-//       </View>
-//     );
-//   }
-
-//   return null;
-// };
-
-// const styles = StyleSheet.create({
-//   lockedContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   lockedText: {
-//     fontSize: 18,
-//     marginBottom: 20,
-//   },
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: 20,
-//   },
-//   title: {
-//     fontSize: 24,
-//     marginBottom: 20,
-//   },
-//   input: {
-//     height: 40,
-//     borderColor: 'gray',
-//     borderWidth: 1,
-//     marginBottom: 20,
-//     paddingHorizontal: 10,
-//     width: '80%',
-//     textAlign: 'center',
-//   },
-//   buttonRow: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-around',
-//     width: '100%',
-//     marginVertical: 20,
-//   },
-// });
-
-// export default GameScreen;
-
-
-
-// import React, { useContext, useState } from 'react';
-// import { View, Text, Button, Image, StyleSheet, Alert } from 'react-native';
-// import { TaskContext } from '../context/TaskContext';
-
-// const rockImage = require('../assets/rock.png');
-// const paperImage = require('../assets/paper.png');
-// const scissorsImage = require('../assets/scissors.png');
-
-// const GameScreen = ({ navigation }) => {
-//   const { isGameUnlocked, gameRoundsLeft, decrementGameRounds, resetGameRounds } = useContext(TaskContext);
-//   const [selectedGame, setSelectedGame] = useState(null);
-//   const [gameMessage, setGameMessage] = useState('');
-//   const [userChoice, setUserChoice] = useState('');
-//   const [computerChoice, setComputerChoice] = useState('');
-
-//   const handlePlayRockPaperScissors = (choice) => {
-//     const choices = ['Rock', 'Paper', 'Scissors'];
-//     const computerChoice = choices[Math.floor(Math.random() * 3)];
-//     setUserChoice(choice);
-//     setComputerChoice(computerChoice);
-
-//     if (
-//       (choice === 'Rock' && computerChoice === 'Scissors') ||
-//       (choice === 'Paper' && computerChoice === 'Rock') ||
-//       (choice === 'Scissors' && computerChoice === 'Paper')
-//     ) {
-//       setGameMessage('You win this round!');
-//     } else if (choice === computerChoice) {
-//       setGameMessage('It\'s a tie!');
-//     } else {
-//       setGameMessage('Computer wins this round!');
-//     }
-
-//     decrementGameRounds();
-//     if (gameRoundsLeft - 1 === 0) {
-//       Alert.alert('Game Over', 'You have no rounds left. The game is now locked.');
-//       resetGameRounds();
-//     }
-//   };
-
-//   if (!isGameUnlocked) {
-//     return (
-//       <View style={styles.lockedContainer}>
-//         <Text style={styles.lockedText}>Complete 3 tasks to unlock the game!</Text>
-//         <Button title="Go Back" onPress={() => navigation.goBack()} />
-//       </View>
-//     );
-//   }
-
-//   if (!selectedGame) {
-//     return (
-//       <View style={styles.container}>
-//         <Text style={styles.title}>Choose a Game</Text>
-//         <Button title="Guess the Number" onPress={() => setSelectedGame('GuessTheNumber')} />
-//         <Button title="Rock-Paper-Scissors" onPress={() => setSelectedGame('RockPaperScissors')} />
-//         <Button title="Go Back" onPress={() => navigation.goBack()} />
-//       </View>
-//     );
-//   }
-
-//   if (selectedGame === 'RockPaperScissors') {
-//     return (
-//       <View style={styles.container}>
-//         <Text style={styles.title}>Rock-Paper-Scissors</Text>
-//         <Text>Choose your move:</Text>
-//         <View style={styles.buttonRow}>
-//           <View style={styles.choiceContainer}>
-//             <Text>Rock</Text>
-//             <Image source={rockImage} style={styles.image} />
-//             <Button title="Select" onPress={() => handlePlayRockPaperScissors('Rock')} />
-//           </View>
-//           <View style={styles.choiceContainer}>
-//             <Text>Paper</Text>
-//             <Image source={paperImage} style={styles.image} />
-//             <Button title="Select" onPress={() => handlePlayRockPaperScissors('Paper')} />
-//           </View>
-//           <View style={styles.choiceContainer}>
-//             <Text>Scissors</Text>
-//             <Image source={scissorsImage} style={styles.image} />
-//             <Button title="Select" onPress={() => handlePlayRockPaperScissors('Scissors')} />
-//           </View>
-//         </View>
-//         <Text>{`Your choice: ${userChoice}`}</Text>
-//         <Text>{`Computer's choice: ${computerChoice}`}</Text>
-//         <Text>{gameMessage}</Text>
-//         <Text>Rounds left: {gameRoundsLeft}</Text>
-//         <Button title="Go Back" onPress={() => setSelectedGame(null)} />
-//       </View>
-//     );
-//   }
-
-//   return null;
-// };
-
-// const styles = StyleSheet.create({
-//   lockedContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   lockedText: {
-//     fontSize: 18,
-//     marginBottom: 20,
-//   },
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: 20,
-//   },
-//   title: {
-//     fontSize: 24,
-//     marginBottom: 20,
-//   },
-//   buttonRow: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-around',
-//     width: '100%',
-//     marginVertical: 20,
-//   },
-//   choiceContainer: {
-//     alignItems: 'center',
-//   },
-//   image: {
-//     width: 100,
-//     height: 100,
-//     marginVertical: 10,
-//   },
-// });
-
-// export default GameScreen;
-
-
-
-
 // screens/GameScreen.js
 
 import React, { useContext, useState, useEffect } from 'react';
@@ -457,16 +29,33 @@ const GameScreen = ({ navigation }) => {
     setRandomNumber(Math.floor(Math.random() * 10) + 1);
   }, []);
   
+  const resetGameState = () => {
+    setRevealChoices(false);
+    setResultMessage('');
+    setUserChoice(null);
+    setComputerChoice(null);
+    setGameMessage('');
+    setUserGuess('');
+  };
+
+  const handleBackToMenu = () => {
+    resetGameState();
+    setCurrentGame(null);
+  };
 
   const handlePlayGame = () => {
     if (parseInt(userGuess) === randomNumber) {
       setGameMessage('Congratulations! You guessed the correct number!');
-      Alert.alert('You won!', 'The game is now locked. Complete more tasks to unlock it again.');
+      Alert.alert('You won!');
     } else {
       setGameMessage('Wrong guess. Try again!');
       decrementGameRounds();
       if (gameRoundsLeft - 1 === 0) {
-        Alert.alert('Game Over', 'You have no rounds left. The game is now locked.');
+        setTimeout(() => {
+          Alert.alert('Game Over', 'You have no rounds left. The game is now locked.');
+          handleBackToMenu();
+        }, 800); 
+       
       }
     }
     setUserGuess('');
@@ -490,7 +79,10 @@ const GameScreen = ({ navigation }) => {
     
       decrementGameRounds();
       if (gameRoundsLeft - 1 === 0) {
-        Alert.alert('Game Over', 'You have no rounds left. The game is now locked.');
+        setTimeout(() => {
+          Alert.alert('Game Over', 'You have no rounds left. The game is now locked.');
+          handleBackToMenu();
+        }, 800); 
       }
 
      setTimeout(() => {
@@ -538,6 +130,11 @@ const GameScreen = ({ navigation }) => {
                   <Text style={styles.gchoiceT} > Rock-Paper-Scissors </Text>
           </TouchableOpacity>
 
+          <Text style={styles.roundsLeft}>Rounds left: {gameRoundsLeft}</Text>
+      <TouchableOpacity  style={styles.gchoice} onPress={() => navigation.goBack()} >
+                  <Text style={styles.gbackT}> Go Back </Text>
+                </TouchableOpacity>
+
         </>
       )}
 
@@ -557,6 +154,10 @@ const GameScreen = ({ navigation }) => {
           />
           <Button title="Submit Guess" onPress={handlePlayGame} color="#28A745" />
           <Text style={styles.gameMessage}>{gameMessage}</Text>
+          <Text style={styles.roundsLeft}>Rounds left: {gameRoundsLeft}</Text>
+<TouchableOpacity style={styles.gchoice} onPress={() => setCurrentGame(null)}>
+  <Text style={styles.gbackT}>Go Back</Text>
+</TouchableOpacity>
         </>
       )}
 
@@ -571,8 +172,13 @@ const GameScreen = ({ navigation }) => {
                   <Image source={choice.image} style={styles.choiceImage} />
                 </TouchableOpacity>
               ))}
+              
             </View>
           )}
+          <Text style={styles.roundsLeft}>Rounds left: {gameRoundsLeft}</Text>
+<TouchableOpacity style={styles.gchoice} onPress={() => setCurrentGame(null)}>
+  <Text style={styles.gbackT}>Go Back</Text>
+</TouchableOpacity>
 
           {revealChoices && (
             <View style={styles.resultContainer}>
@@ -597,11 +203,6 @@ const GameScreen = ({ navigation }) => {
         </>
       )}
 
-      <Text style={styles.roundsLeft}>Rounds left: {gameRoundsLeft}</Text>
-      {/* <Button title="Go Back" onPress={() => navigation.goBack()} color="#007AFF" /> */}
-      <TouchableOpacity  style={styles.gchoice} onPress={() => navigation.goBack()} >
-                  <Text style={styles.gbackT}> Go Back </Text>
-                </TouchableOpacity>
     </View>
   );
 };

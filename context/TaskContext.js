@@ -7,29 +7,36 @@ import { doc, setDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase
 import { addDays, format, parseISO, startOfDay, endOfDay, isValid,  getISOWeek, getISOWeekYear } from 'date-fns';
 
 
+// Create a context object to manage task-related state and provide access to it throughout the app.
 export const TaskContext = createContext();
 
+// TaskProvider component to wrap the part of the app that needs access to task-related state.
 export const TaskProvider = ({ children }) => {
-  const [tasks, setTasks] = useState([]);
-  const [completedTasksCount, setCompletedTasksCount] = useState(0);
-  const [workSessions, setWorkSessions] = useState([]);
-  const [isGameUnlocked, setIsGameUnlocked] = useState(false);
-  const [gameRoundsLeft, setGameRoundsLeft] = useState(3);
-  const [isGameUnlockedRecently, setIsGameUnlockedRecently] = useState(false);
-  const [completedTasksToday, setCompletedTasksToday] = useState(0);
-  const [user, setUser] = useState(auth.currentUser);
 
-  
+  // State variables for managing tasks, game state, work sessions, etc
+  const [tasks, setTasks] = useState([]); // List of tasks
+  const [completedTasksCount, setCompletedTasksCount] = useState(0); // Count of completed tasks
+  const [workSessions, setWorkSessions] = useState([]); // List of work sessions
+  const [isGameUnlocked, setIsGameUnlocked] = useState(false); // Game unlock status
+  const [gameRoundsLeft, setGameRoundsLeft] = useState(3); // Rounds left for the game
+  const [isGameUnlockedRecently, setIsGameUnlockedRecently] = useState(false); // Recently unlocked game status
+  const [completedTasksToday, setCompletedTasksToday] = useState(0); // Number of tasks completed today
+  const [user, setUser] = useState(auth.currentUser); // Current logged-in user
+
+
 
 
 const today = format(new Date(), 'yyyy-MM-dd'); // Get today's date in 'yyyy-MM-dd' format
 
+
+ // Effect to update the count of tasks completed today whenever the tasks state changes.
 useEffect(() => {
     const completedTodayCount = tasks.filter(task => task.myStatus === 'Done' && task.date === today).length;
     setCompletedTasksToday(completedTodayCount); // Set the count of tasks completed today
 }, [tasks]);
 
 
+ // Effect to handle user authentication state changes and fetch tasks when user logs in.
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser);
@@ -45,10 +52,12 @@ useEffect(() => {
     return () => unsubscribe();
   }, []);
 
+
+  // Effect to update completed tasks count and game unlock status when tasks or game unlock status changes.
   useEffect(() => {
     const completedCount = tasks.filter(task => task.myStatus === 'Done' && task.isNew).length;
     setCompletedTasksCount(completedCount);
-    
+
 
     if (completedCount >= 3 && !isGameUnlocked) {
       setIsGameUnlocked(true);
@@ -59,42 +68,38 @@ useEffect(() => {
 
 
 
-
- 
-
-  
-  
- 
-
+// Function to predict the completion date of a task based on the average completion time of previous tasks.
   const predictTaskCompletion = (taskId) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return null;
-  
+
     if (!task.date || isNaN(new Date(task.date).getTime())) {
       console.error('Invalid task date:', task.date);
       return null;
     }
-  
+
     const completedTasks = tasks.filter(t => t.myStatus === 'Done');
-    
+
     if (completedTasks.length === 0) return 'N/A'; // No completed tasks, can't predict
-  
+
     const avgCompletionTime = completedTasks.reduce((sum, t) => {
       const taskCompletionTime = t.completionTime ? new Date(t.completionTime) : new Date();
       const taskDate = new Date(t.date);
-      
+
       if (isNaN(taskCompletionTime.getTime()) || isNaN(taskDate.getTime())) {
         console.error('Invalid date values:', t.completionTime, t.date);
         return sum; // Skip this entry
       }
-      
+
       return sum + (taskCompletionTime - taskDate);
     }, 0) / completedTasks.length;
-    
+
     const predictedCompletionDate = addDays(new Date(task.date), avgCompletionTime / (1000 * 60 * 60 * 24));
     return format(predictedCompletionDate, 'yyyy-MM-dd');
   };
-  
+
+
+  // Function to calculate the task completion rate as a ratio of completed to total tasks.
   const getTaskCompletionRate = () => {
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(t => t.myStatus === 'Done').length;
@@ -102,31 +107,33 @@ useEffect(() => {
   };
 
 
+
+// Function to fetch tasks from Firestore for a given user.
   const fetchTasks = async (userId) => {
     try {
       const tasksRef = collection(firestore, 'users', userId, 'tasks');
       const querySnapshot = await getDocs(tasksRef);
       const tasksList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  
+
       // Log fetched tasks
       console.log('Fetched Tasks:', tasksList);
-  
+
       // Optional: Adjust the 'isNew' flag for tasks based on their status
       const updatedTasksList = tasksList.map(task => ({
         ...task,
         isNew: task.myStatus === 'Done' ? false : task.isNew
       }));
-  
+
       setTasks(updatedTasksList);
     } catch (error) {
       console.error('Error fetching tasks: ', error);
     }
   };
-  
 
 
-  
 
+
+ // Function to add a new task to Firestore and update the local state.
   const addTask = async (task) => {
     try {
       if (user) {
@@ -141,7 +148,7 @@ useEffect(() => {
     }
   };
 
-  //realcorrect
+// Function to update an existing task in Firestore and update the local state.
   const updateTask = async (updatedTask) => {
     try {
       if (user) {
@@ -163,9 +170,9 @@ useEffect(() => {
   };
 
 
- 
 
 
+// Function to delete a task from Firestore and update the local state.
   const deleteTask = async (taskId) => {
     try {
       if (user) {
@@ -179,42 +186,45 @@ useEffect(() => {
     }
   };
 
-  
-  
 
+
+// Function to filter tasks based on their status.
   const filterTasks = (status) => {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
-  
+
     // Calculate the date range for done tasks
     const startDate = new Date(today);
     startDate.setDate(today.getDate() - 3); // 3 days before today
     const startDateStr = startDate.toISOString().split('T')[0];
-  
-  
+
+
     if (status === 'All') {
       return tasks.filter(task => {
         // Exclude tasks that are done and have a past date
         return !(task.myStatus === 'Done' && task.date < todayStr);
       });
     }
-  
+
     if (status === 'Done') {
       return tasks.filter(task => {
         // Include done tasks within the specified date range
         return task.myStatus === 'Done' && task.date >= startDateStr;
       });
     }
-  
+
     // For other statuses, simply filter based on status
     return tasks.filter(task => task.myStatus === status);
   };
-  
 
+
+  // Function to filter tasks based on their date.
   const filterTasksByDate = (date) => {
     return tasks.filter(task => task.date === date);
   };
 
+
+// Function to add attachment to tasks.
   const addAttachmentToTask = async (taskId, attachment) => {
     try {
       if (user) {
@@ -234,6 +244,8 @@ useEffect(() => {
     }
   };
 
+
+// Function to update attachment to tasks.
   const updateTaskAttachment = async (taskId, updatedAttachment) => {
     try {
       if (user) {
@@ -260,6 +272,8 @@ useEffect(() => {
     }
   };
 
+
+ // Function to remove attachment from tasks.
   const removeTaskAttachment = async (taskId, attachmentId) => {
     try {
       if (user) {
@@ -279,10 +293,15 @@ useEffect(() => {
     }
   };
 
+
+
+// Function to sort based on priority.
   const sortTasksByPriority = (tasksList) => {
     return tasksList.sort((a, b) => a.priority - b.priority);
   };
 
+
+// Function to add worksessions.  
   const addWorkSession = async () => {
     try {
       if (user) {
@@ -290,7 +309,7 @@ useEffect(() => {
         // Add work session to Firestore
         const sessionsRef = collection(firestore, 'users', user.uid, 'workSessions');
         await setDoc(doc(sessionsRef, newSession.id.toString()), newSession);
-        
+
         // Update local state
         setWorkSessions(prevSessions => [...prevSessions, newSession]);
         console.log('Work session added to Firestore and state:', newSession);
@@ -302,6 +321,8 @@ useEffect(() => {
     }
   };
 
+
+// Function to decrease game rounds and locking.
   const decrementGameRounds = () => {
     if (gameRoundsLeft > 1) {
       setGameRoundsLeft(gameRoundsLeft - 1);
@@ -320,12 +341,12 @@ useEffect(() => {
 
       setTimeout(() => {
         setIsGameUnlocked(false);
-      }, 900);
+      }, 950);
     }
   };
 
-  
-  
+
+
 
   return (
     <TaskContext.Provider
@@ -355,9 +376,3 @@ useEffect(() => {
     </TaskContext.Provider>
   );
 };
-
-
-
-
-
-

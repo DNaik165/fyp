@@ -1,8 +1,9 @@
 //screens/CompletedTasksScreen.js
 
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SectionList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SectionList, TouchableOpacity, Image  } from 'react-native';
 import { TaskContext } from '../context/TaskContext';
+import { useNavigation } from '@react-navigation/native';
 
 const TaskItem = ({ task, onPress }) => (
         <TouchableOpacity onPress={() => onPress(task)}>
@@ -22,8 +23,9 @@ const TaskItem = ({ task, onPress }) => (
         </TouchableOpacity>
       );
 
-
+      
 const categorizeCompletedTasks = (tasks) => {
+  
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
   
@@ -72,6 +74,13 @@ const categorizeCompletedTasks = (tasks) => {
 };
 
 const CompletedTasksScreen = () => {
+  const navigation = useNavigation();
+  
+  const handleTaskPress = (task) => {
+    navigation.navigate('UpdateTask', { task });
+  };
+
+
   const { tasks } = useContext(TaskContext);
   const [categorizedTasks, setCategorizedTasks] = useState({
     today: [],
@@ -87,7 +96,7 @@ const CompletedTasksScreen = () => {
   }, [tasks]);
 
   const renderTaskItem = ({ item }) => (
-    <TaskItem task={item} onPress={(task) => {/* Handle task press here */}} />
+    <TaskItem task={item} onPress={handleTaskPress} />
   );
 
   const sections = [
@@ -172,3 +181,7 @@ const styles = StyleSheet.create({
 });
 
 export default CompletedTasksScreen;
+
+
+
+

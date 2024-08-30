@@ -33,19 +33,11 @@ const CustomDrawerContent = (props) => (
   </DrawerContentScrollView>
 );
 
-
+//Const navigators
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
-
-// const HomeStackNavigator = () => (
-//   <Stack.Navigator>
-//     <Stack.Screen name="Todo" component={HomeScreen} />
-//     <Stack.Screen name="UpdateTask" component={UpdateTaskScreen} />
-//     <Stack.Screen name="Game" component={GameScreen} />
-//   </Stack.Navigator>
-// );
 
 const HomeStackNavigator = () => (
   <Stack.Navigator>
@@ -58,6 +50,17 @@ const HomeStackNavigator = () => (
           backgroundColor: 'skyblue', // Adjust as needed
         },
       }}
+    />
+    <Stack.Screen name="UpdateTask" component={UpdateTaskScreen} />
+  </Stack.Navigator>
+);
+
+const TaskCStackNavigator = () => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="Completed Tasks"
+      component={CompletedTasksScreen}
+      options={{ headerShown:false }} 
     />
     <Stack.Screen name="UpdateTask" component={UpdateTaskScreen} />
   </Stack.Navigator>
@@ -112,7 +115,7 @@ const DrawerNavigator = () => (
     />
     <Drawer.Screen name="Game" component={GameScreen} />
     <Drawer.Screen name="Progress Report" component={ProgressReportScreen} />
-    <Drawer.Screen name="Completed Tasks" component={CompletedTasksScreen} />
+    <Drawer.Screen name="Completed Tasks" component={TaskCStackNavigator} />
     <Drawer.Screen name="Profile" component={UserProfileScreen} />
   </Drawer.Navigator>
 );
@@ -155,16 +158,6 @@ const TabNavigator = () => (
         ),
       }}
     />
-    {/* <Tab.Screen
-      name="Progress Report"
-      style={styles.drawerTitle}
-      component={ProgressReportScreen}
-      options={{
-        tabBarIcon: ({ color, size }) => (
-          <AntDesign name="barschart" size={size} color={color} />
-        ),
-      }}
-    /> */}
   </Tab.Navigator>
 );
 
@@ -183,9 +176,7 @@ const AppNavigator = () => {
     return () => unsubscribe();
   }, []);
 
-  if (isLoading) {
-    return null; // Optionally show a loading spinner or splash screen here
-  }
+ 
 
   return (
     <NavigationContainer>
@@ -195,16 +186,6 @@ const AppNavigator = () => {
         <Stack.Screen name="Home" component={DrawerNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
-    // <NavigationContainer>
-    //   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    //     <Stack.Screen name="Welcome" component={WelAppScreen} />
-    //     {isLoggedIn ? (
-    //       <Stack.Screen name="Home" component={TabNavigator} />
-    //     ) : (
-    //       <Stack.Screen name="Auth" component={AuthScreen} />
-    //      )} 
-    //   </Stack.Navigator>
-    // </NavigationContainer>
   );
 };
 
