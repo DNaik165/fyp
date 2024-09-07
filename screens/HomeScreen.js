@@ -192,37 +192,7 @@ const HomeScreen = ({ navigation }) => {
         <FontAwesome5 name="gamepad" style={styles.floatingButtonText} />
       </TouchableOpacity>
 
-      {/* <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        
-        
-        <View style={styles.modalContent}>
-
-        <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-          <FontAwesome6 name="square-xmark" style={styles.xText} />
-          </TouchableOpacity>
-
-          <Text style={styles.modalText}>Completed Tasks: {completedTasksCount}</Text>
-          <Text style={styles.modalText}>Game Status: {isGameUnlocked ? 'Unlocked' : 'Locked'}</Text>
-          <TouchableOpacity
-             style={styles.gameButton}  // You can define your styles to make it look like a button
-              onPress={() => {
-              setIsModalVisible(false); // Close modal before navigating
-              if (isGameUnlocked) {
-                navigation.navigate('Game');
-                } else {
-                alert('Complete more tasks to unlock the game!');
-                }
-                }}
-            >
-            <Text style={styles.gameButtonText}>Go to Game</Text>
-            </TouchableOpacity>
-        </View>
-      </Modal> */}
+     
 
 <Modal
   visible={isModalVisible}
